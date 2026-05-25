@@ -11,6 +11,8 @@
     "examples": "node print-examples.js"
   },
   "dependencies": {
-    "playwright": "^1.49.1"
+    "@sparticuz/chromium": "^131.0.0",
+    "playwright": "^1.49.1",
+    "playwright-core": "^1.49.1"
   }
 }

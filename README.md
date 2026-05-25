@@ -56,6 +56,16 @@ node print-examples.js
 
 `katina-print.css` is for browser **Print → Save as PDF** on Katina pages. The app also strips sharing, tags, “You may also like”, Disqus, Hypothesis, comments, and newsletter forms; keeps the copyright paragraph; avoids images splitting across pages.
 
+## Deploy on Netlify
+
+1. Push this repo to GitHub and connect the site on Netlify.
+2. Build settings (from `netlify.toml`): **publish** `public`, **functions** `netlify/functions`, build command `npm install`.
+3. Redeploy after each push.
+
+`POST /api/pdf` is handled by a serverless function (Playwright + Chromium). PDF generation often takes **20–60 seconds** — use a **Pro** plan if functions hit the 10s free-tier limit (this project sets a **26s** timeout for `api-pdf`).
+
+If PDF fails with Cloudflare or timeout errors, use the local app (`node server.js`) instead.
+
 ## Project layout
 
 ```

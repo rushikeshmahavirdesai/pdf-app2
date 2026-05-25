@@ -1,0 +1,63 @@
+/**
+ * Katina Magazine — print stylesheet
+ * For browser Print → Save as PDF on katinamagazine.org (install as user stylesheet).
+ * The Playwright app prints the live page directly; this file is for manual use.
+ */
+
+@media print {
+  nav,
+  aside,
+  .sidebar,
+  .share-tools,
+  .social-share,
+  .tags,
+  .tag-list,
+  .article-tags,
+  .ymal,
+  .you-may-also-like,
+  [class*="you-may-also-like"],
+  [class*="related-article"],
+  #disqus_thread,
+  .disqus,
+  #hypothesis-sidebar,
+  [class*="hypothesis"],
+  iframe[src*="hypothes.is"],
+  .comments,
+  .comment-section,
+  .newsletter,
+  [class*="newsletter"],
+  [class*="join-our-community"],
+  [class*="layout-menu"],
+  #layout-menu,
+  button,
+  [role="navigation"] {
+    display: none !important;
+  }
+
+  #main-content-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  img,
+  figure,
+  picture {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    max-width: 100% !important;
+  }
+
+  .copyright,
+  [class*="copyright"] {
+    display: block !important;
+  }
+
+  @page {
+    margin: 1.5cm;
+  }
+
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

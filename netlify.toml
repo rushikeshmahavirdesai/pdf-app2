@@ -1,0 +1,16 @@
+[build]
+  command = "npm install"
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  external_node_modules = ["@sparticuz/chromium"]
+
+[functions."api-pdf"]
+  timeout = 26
+
+[[redirects]]
+  from = "/api/pdf"
+  to = "/.netlify/functions/api-pdf"
+  status = 200

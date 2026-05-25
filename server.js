@@ -11,7 +11,7 @@ const {
 
 const PORT = Number(process.env.PORT) || 3456;
 const PUBLIC = path.join(__dirname, "public");
-const ROOT_CSS = path.join(__dirname, "katina-print.css");
+const ROOT_CSS = path.join(PUBLIC, "katina-print.css");
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
