@@ -1,7 +1,6 @@
 /**
- * Local dev server on port 8888 — serves public/ and the fetch-article function.
- * Use: npm run dev
- * (Netlify production uses netlify/functions automatically.)
+ * Local dev server on port 8888 — serves public/ and Netlify functions.
+ * PDF uses Playwright (run npm run setup once).
  */
 const http = require("http");
 const fs = require("fs");
@@ -10,7 +9,11 @@ const { URL } = require("url");
 
 const PORT = Number(process.env.PORT) || 8888;
 const PUBLIC = path.join(__dirname, "public");
-const { handler } = require("./netlify/functions/fetch-article");
+
+const functions = {
+  "fetch-article": require("./netlify/functions/fetch-article"),
+  "generate-pdf": require("./netlify/functions/generate-pdf"),
+};
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -18,20 +21,20 @@ const MIME = {
   ".js": "application/javascript; charset=utf-8",
   ".json": "application/json",
   ".ico": "image/x-icon",
-  ".map": "application/json",
 };
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${PORT}`);
+  const fnMatch = url.pathname.match(/^\/\.netlify\/functions\/([^/]+)$/);
 
-  if (url.pathname === "/.netlify/functions/fetch-article") {
-    return handleFunction(req, res, url);
+  if (fnMatch && functions[fnMatch[1]]) {
+    return handleFunction(functions[fnMatch[1]], req, res, url);
   }
 
   return serveStatic(url.pathname, res);
 });
 
-async function handleFunction(req, res, url) {
+async function handleFunction(handler, req, res, url) {
   if (req.method === "OPTIONS") {
     res.writeHead(204, corsHeaders());
     return res.end();
@@ -43,10 +46,13 @@ async function handleFunction(req, res, url) {
   };
 
   try {
-    const result = await handler(event);
+    const result = await handler.handler(event);
     const headers = { ...corsHeaders(), ...result.headers };
     res.writeHead(result.statusCode, headers);
-    res.end(result.body);
+    const body = result.isBase64Encoded
+      ? Buffer.from(result.body, "base64")
+      : result.body;
+    res.end(body);
   } catch (err) {
     res.writeHead(500, { "Content-Type": "application/json", ...corsHeaders() });
     res.end(JSON.stringify({ error: err.message }));
@@ -84,5 +90,6 @@ function serveStatic(pathname, res) {
 
 server.listen(PORT, () => {
   console.log(`Katina Print dev server: http://localhost:${PORT}`);
-  console.log(`Function: http://localhost:${PORT}/.netlify/functions/fetch-article`);
+  console.log(`PDF: http://localhost:${PORT}/.netlify/functions/generate-pdf`);
+  console.log("First time: npm run setup");
 });

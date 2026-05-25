@@ -1,10 +1,17 @@
 # Katina Print
 
-Minimal tool to download print CSS for Katina Magazine articles and generate cleaned PDFs.
+Minimal tool to download print CSS for Katina Magazine articles and generate cleaned PDFs with **Playwright**.
+
+## Setup (first time)
+
+```bash
+npm install
+npm run setup
+```
+
+`npm run setup` installs Chromium for local Playwright PDF generation.
 
 ## Local development
-
-**Recommended** (functions work on port 8888):
 
 ```bash
 npm run dev
@@ -12,29 +19,24 @@ npm run dev
 
 Open **http://localhost:8888**
 
-Alternative with Netlify CLI:
+Or with Netlify CLI:
 
 ```bash
 npm run dev:netlify
 ```
 
-Do **not** use Live Server or another static-only server on 8888 — `/.netlify/functions/fetch-article` will return 404 without the function handler.
-4. Paste a Katina article URL, e.g.  
-   `https://katinamagazine.org/content/article/future-of-work/2025/how-were-thinking-about-the-future-of-work`
+## Usage
+
+- **Download CSS** — saves `katina-print.css`
+- **Download PDF** — Playwright opens the article in headless Chrome, applies print CSS, strips clutter, returns a PDF (may take up to a minute)
 
 ## Deploy to Netlify
 
-1. Push this folder to GitHub (or drag-and-drop deploy).
-2. In Netlify: **Add new site** → import repo or upload folder.
-3. Build settings (auto-detected from `netlify.toml`):
-   - **Publish directory:** `public`
-   - **Functions directory:** `netlify/functions`
-   - **Build command:** (leave empty)
-4. Deploy. Functions run at `/.netlify/functions/fetch-article`.
+1. Connect [pdf-app2](https://github.com/rushikeshmahavirdesai/pdf-app2) to Netlify
+2. Settings from `netlify.toml`:
+   - Publish: `public`
+   - Functions: `netlify/functions`
+   - Build command: `npm install`
+3. Deploy. The `generate-pdf` function uses serverless Chromium (`@sparticuz/chromium`).
 
-## Usage
-
-- **Download CSS** — saves `katina-print.css` for use on Katina pages or in the app.
-- **Download PDF** — fetches the article, strips sharing, tags, comments, Disqus, Hypothesis, YMAL, and newsletter blocks; keeps the copyright paragraph; downloads a PDF.
-
-Katina blocks server fetches (HTTP 403). **Download PDF** opens the article in your browser, copies a short script to the clipboard, then you paste it in the address bar on that tab (Ctrl+L → Ctrl+V → Enter) to generate the PDF. **Download CSS** still works anytime.
+**Note:** Katina may still block automated browsers from some datacenter IPs. If PDF fails on Netlify, use **Download CSS** on the live article page.
