@@ -1,10 +1,11 @@
 [build]
+  command = "npm install"
   publish = "public"
   functions = "netlify/functions"
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["@sparticuz/chromium"]
+  external_node_modules = ["@sparticuz/chromium", "playwright-core"]
 
 [functions.generate-pdf]
   timeout = 26
@@ -14,5 +15,3 @@
   port = 8888
   publish = "public"
   functions = "netlify/functions"
-  framework = "#static"
-  autoLaunch = false

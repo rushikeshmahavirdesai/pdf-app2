@@ -1,7 +1,3 @@
-/**
- * Local dev server on port 8888 — serves public/ and Netlify functions.
- * PDF uses Playwright (run npm run setup once).
- */
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
@@ -9,34 +5,27 @@ const { URL } = require("url");
 
 const PORT = Number(process.env.PORT) || 8888;
 const PUBLIC = path.join(__dirname, "public");
-
-const functions = {
-  "fetch-article": require("./netlify/functions/fetch-article"),
-  "generate-pdf": require("./netlify/functions/generate-pdf"),
-};
+const generatePdf = require("./netlify/functions/generate-pdf");
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "application/javascript; charset=utf-8",
-  ".json": "application/json",
-  ".ico": "image/x-icon",
 };
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://127.0.0.1:${PORT}`);
-  const fnMatch = url.pathname.match(/^\/\.netlify\/functions\/([^/]+)$/);
 
-  if (fnMatch && functions[fnMatch[1]]) {
-    return handleFunction(functions[fnMatch[1]], req, res, url);
+  if (url.pathname === "/.netlify/functions/generate-pdf") {
+    return handlePdf(req, res, url);
   }
 
   return serveStatic(url.pathname, res);
 });
 
-async function handleFunction(handler, req, res, url) {
+async function handlePdf(req, res, url) {
   if (req.method === "OPTIONS") {
-    res.writeHead(204, corsHeaders());
+    res.writeHead(204, cors());
     return res.end();
   }
 
@@ -46,30 +35,28 @@ async function handleFunction(handler, req, res, url) {
   };
 
   try {
-    const result = await handler.handler(event);
-    const headers = { ...corsHeaders(), ...result.headers };
+    const result = await generatePdf.handler(event);
+    const headers = { ...cors(), ...result.headers };
     res.writeHead(result.statusCode, headers);
-    const body = result.isBase64Encoded
-      ? Buffer.from(result.body, "base64")
-      : result.body;
-    res.end(body);
+    res.end(
+      result.isBase64Encoded
+        ? Buffer.from(result.body, "base64")
+        : result.body
+    );
   } catch (err) {
-    res.writeHead(500, { "Content-Type": "application/json", ...corsHeaders() });
+    res.writeHead(500, { "Content-Type": "application/json", ...cors() });
     res.end(JSON.stringify({ error: err.message }));
   }
 }
 
-function corsHeaders() {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Allow-Methods": "GET, OPTIONS",
-  };
+function cors() {
+  return { "Access-Control-Allow-Origin": "*" };
 }
 
 function serveStatic(pathname, res) {
-  let filePath = pathname === "/" ? "/index.html" : pathname;
-  filePath = path.normalize(filePath).replace(/^(\.\.[/\\])+/, "");
+  const filePath = path.normalize(
+    pathname === "/" ? "/index.html" : pathname
+  ).replace(/^(\.\.[/\\])+/, "");
   const full = path.join(PUBLIC, filePath);
 
   if (!full.startsWith(PUBLIC)) {
@@ -82,14 +69,14 @@ function serveStatic(pathname, res) {
       res.writeHead(404);
       return res.end("Not found");
     }
-    const ext = path.extname(full);
-    res.writeHead(200, { "Content-Type": MIME[ext] || "application/octet-stream" });
+    res.writeHead(200, {
+      "Content-Type": MIME[path.extname(full)] || "application/octet-stream",
+    });
     res.end(data);
   });
 }
 
 server.listen(PORT, () => {
-  console.log(`Katina Print dev server: http://localhost:${PORT}`);
-  console.log(`PDF: http://localhost:${PORT}/.netlify/functions/generate-pdf`);
-  console.log("First time: npm run setup");
+  console.log(`http://localhost:${PORT}`);
+  console.log("Run once: npm run setup");
 });
