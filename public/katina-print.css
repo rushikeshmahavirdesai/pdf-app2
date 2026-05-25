@@ -1,6 +1,54 @@
 /**
- * Katina Magazine — print / PDF stylesheet
+ * Katina Magazine — print stylesheet
+ * Browser: use with Print → Save as PDF (@media print rules).
+ * Katina Print app: .katina-print-root rules apply to PDF preview.
  */
+
+.katina-print-root .share-tools,
+.katina-print-root .social-share,
+.katina-print-root .tags,
+.katina-print-root .tag-list,
+.katina-print-root .article-tags,
+.katina-print-root .ymal,
+.katina-print-root .you-may-also-like,
+.katina-print-root #disqus_thread,
+.katina-print-root .disqus,
+.katina-print-root #hypothesis-sidebar,
+.katina-print-root [class*="hypothesis"],
+.katina-print-root .comments,
+.katina-print-root .comment-section,
+.katina-print-root .newsletter,
+.katina-print-root [class*="newsletter"],
+.katina-print-root [class*="join-our-community"],
+.katina-print-root [class*="you-may-also-like"],
+.katina-print-root [class*="related-article"],
+.katina-print-root [class*="layout-menu"],
+.katina-print-root aside,
+.katina-print-root nav,
+.katina-print-root button {
+  display: none !important;
+}
+
+.katina-print-root {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 12pt;
+  line-height: 1.5;
+  color: #000;
+}
+
+.katina-print-root h1,
+.katina-print-root h2,
+.katina-print-root h3 {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+}
+
+.katina-print-root img,
+.katina-print-root figure,
+.katina-print-root picture {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  max-width: 100%;
+}
 
 @media print {
   /* Sharing */
@@ -19,7 +67,7 @@
     display: none !important;
   }
 
-  /* You may also like (sidebar + in-article) */
+  /* You may also like */
   .ymal,
   .you-may-also-like,
   aside,
@@ -38,7 +86,6 @@
 
   /* Hypothesis */
   #hypothesis-sidebar,
-  .hypothesis,
   [class*="hypothesis"],
   iframe[src*="hypothes.is"] {
     display: none !important;
@@ -58,10 +105,9 @@
     display: none !important;
   }
 
-  /* Site chrome (not article header/footer with copyright) */
-  body > header,
+  /* Site chrome (keep article + copyright footer) */
   body > nav,
-  body > footer:not(:has(.copyright)),
+  body > header,
   [class*="layout-menu"],
   #layout-menu,
   iframe,
@@ -70,7 +116,9 @@
     display: none !important;
   }
 
-  @page { margin: 2cm; }
+  @page {
+    margin: 2cm;
+  }
 
   body {
     font-family: Georgia, "Times New Roman", serif;
@@ -89,9 +137,16 @@
   h2 { font-size: 1.35rem; margin: 1.25rem 0 0.5rem; }
   h3 { font-size: 1.15rem; margin: 1rem 0 0.4rem; }
 
-  p { margin: 0 0 0.75rem; orphans: 3; widows: 3; }
+  p {
+    margin: 0 0 0.75rem;
+    orphans: 3;
+    widows: 3;
+  }
 
-  a { color: #000; text-decoration: underline; }
+  a {
+    color: #000;
+    text-decoration: underline;
+  }
 
   img,
   figure,

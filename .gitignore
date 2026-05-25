@@ -1,5 +1,4 @@
-.netlify/
 node_modules/
+.netlify/
+test-out.pdf
 .DS_Store
-/test-results/
-/playwright-report/

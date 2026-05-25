@@ -37,7 +37,10 @@ button {
   color: #fff;
 }
 
-button:disabled { opacity: 0.6; cursor: not-allowed; }
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 #status {
   margin: 0.75rem 0 0;
@@ -45,4 +48,6 @@ button:disabled { opacity: 0.6; cursor: not-allowed; }
   color: #555;
 }
 
-#status.error { color: #c00; }
+#status.error {
+  color: #c00;
+}

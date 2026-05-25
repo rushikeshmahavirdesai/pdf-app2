@@ -1,21 +1,31 @@
 # Katina Print
 
-Minimal app: paste a Katina article URL → **Download CSS** or **Download PDF**.
+Simple **client-side** app (static files only). Deploy to Netlify — no build, no server functions.
+
+## Files
+
+- `public/index.html` — URL input + Download CSS + Download PDF
+- `public/katina-print.css` — print stylesheet for Katina articles
+- `public/app.js` — fetches article, builds PDF in the browser
 
 ## Local
 
-```bash
-npm install
-npm run setup
-npm run dev
-```
+Open `public/index.html` in a browser, or:
 
-http://localhost:8888
+```bash
+npx serve public
+```
 
 ## Netlify
 
-Deploy repo. Build: `npm install`. Publish: `public`.
+Publish directory: `public`
 
 ## Print CSS
 
-`katina-print.css` — hides sharing, tags, YMAL, Disqus, Hypothesis, comments, newsletter; keeps copyright; images don’t split across pages.
+Hides: sharing, tags, you-may-also-like, Disqus, Hypothesis, comments, newsletter.  
+Keeps: article body and copyright.  
+Images do not split across pages.
+
+## PDF note
+
+PDF is generated in your browser. If fetch is blocked, the article opens in a new tab — use **Ctrl+P** → Save as PDF (with Download CSS installed as a user stylesheet).
