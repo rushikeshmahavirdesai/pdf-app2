@@ -3,54 +3,42 @@
  * Use on katinamagazine.org article pages or via the Katina Print app.
  */
 
-/* --- Hide clutter --- */
-.share,
+/* --- Hide clutter (specific selectors only — broad [class*="…"] hides article body) --- */
 .share-tools,
 .social-share,
-[class*="share"],
-[class*="sharing"],
 .tags,
 .tag-list,
 .article-tags,
-[class*="tag-list"],
-[class*="article-tag"],
 .ymal,
-[class*="ymal"],
 .you-may-also-like,
-[class*="you-may"],
-[class*="related-article"],
 #disqus_thread,
 .disqus,
-[id*="disqus"],
-[class*="disqus"],
 #hypothesis-sidebar,
-.hypothesis,
-[class*="hypothesis"],
 iframe[src*="hypothes.is"],
 iframe[src*="disqus"],
 .comments,
 .comment-section,
-[class*="comment"],
 .newsletter,
-[class*="newsletter"],
-[class*="community-form"],
 [class*="join-our-community"],
-nav,
-header.site-header,
-footer.site-footer,
-[class*="advert"],
-[class*="advertisement"],
+[class*="you-may-also-like"],
+[class*="related-article"],
 [class*="layout-menu"],
 #layout-menu,
 .sidebar,
 aside,
-.promo,
-[class*="promo"],
 .cookie,
-[class*="cookie"],
-button,
 [role="navigation"] {
   display: none !important;
+}
+
+@media print {
+  nav,
+  header.site-header,
+  footer.site-footer,
+  [class*="advertisement"],
+  button {
+    display: none !important;
+  }
 }
 
 /* --- Base typography --- */
