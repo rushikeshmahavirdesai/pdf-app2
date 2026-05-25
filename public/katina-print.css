@@ -1,32 +1,67 @@
 /**
- * Katina Magazine — print stylesheet
- * Use with browser Print → PDF or the Katina Print app (Playwright).
+ * Katina Magazine — print / PDF stylesheet
  */
 
 @media print {
-  /* Hide clutter */
-  nav,
-  header,
-  footer:not(:has(.copyright)),
-  aside,
-  .sidebar,
+  /* Sharing */
   .share-tools,
   .social-share,
+  [class*="share-bar"],
+  [class*="sharing"] {
+    display: none !important;
+  }
+
+  /* Tags */
   .tags,
   .tag-list,
   .article-tags,
+  [class*="tag-list"] {
+    display: none !important;
+  }
+
+  /* You may also like (sidebar + in-article) */
   .ymal,
   .you-may-also-like,
+  aside,
+  .sidebar,
+  [class*="you-may-also-like"],
+  [class*="related-article"] {
+    display: none !important;
+  }
+
+  /* Disqus */
   #disqus_thread,
   .disqus,
+  [id*="disqus"] {
+    display: none !important;
+  }
+
+  /* Hypothesis */
   #hypothesis-sidebar,
+  .hypothesis,
+  [class*="hypothesis"],
+  iframe[src*="hypothes.is"] {
+    display: none !important;
+  }
+
+  /* Comments */
   .comments,
   .comment-section,
+  [class*="comment-section"] {
+    display: none !important;
+  }
+
+  /* Join our community / newsletter */
   .newsletter,
   [class*="newsletter"],
-  [class*="join-our-community"],
-  [class*="you-may-also-like"],
-  [class*="related-article"],
+  [class*="join-our-community"] {
+    display: none !important;
+  }
+
+  /* Site chrome (not article header/footer with copyright) */
+  body > header,
+  body > nav,
+  body > footer:not(:has(.copyright)),
   [class*="layout-menu"],
   #layout-menu,
   iframe,
@@ -35,9 +70,7 @@
     display: none !important;
   }
 
-  @page {
-    margin: 2cm;
-  }
+  @page { margin: 2cm; }
 
   body {
     font-family: Georgia, "Times New Roman", serif;
@@ -56,15 +89,10 @@
   h2 { font-size: 1.35rem; margin: 1.25rem 0 0.5rem; }
   h3 { font-size: 1.15rem; margin: 1rem 0 0.4rem; }
 
-  p {
-    margin: 0 0 0.75rem;
-    orphans: 3;
-    widows: 3;
-  }
+  p { margin: 0 0 0.75rem; orphans: 3; widows: 3; }
 
   a { color: #000; text-decoration: underline; }
 
-  /* Images: do not split across pages */
   img,
   figure,
   picture {
@@ -74,7 +102,6 @@
     height: auto;
   }
 
-  /* Keep copyright at end */
   .copyright,
   [class*="copyright"] {
     display: block !important;

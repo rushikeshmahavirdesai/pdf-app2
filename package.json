@@ -1,11 +1,9 @@
 {
-  "name": "katina-print-app",
+  "name": "katina-print",
   "version": "1.0.0",
   "private": true,
-  "description": "Minimal Katina article print CSS and PDF tool for Netlify",
   "scripts": {
     "dev": "node server.js",
-    "dev:netlify": "netlify dev --port 8888",
     "setup": "npx playwright install chromium"
   },
   "dependencies": {

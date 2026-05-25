@@ -1,8 +1,8 @@
 # Katina Print
 
-Paste a Katina article URL → **Download CSS** or **Download PDF** (Playwright).
+Minimal app: paste a Katina article URL → **Download CSS** or **Download PDF**.
 
-## Setup
+## Local
 
 ```bash
 npm install
@@ -10,12 +10,12 @@ npm run setup
 npm run dev
 ```
 
-Open http://localhost:8888
+http://localhost:8888
 
 ## Netlify
 
-Connect repo, deploy. Build command: `npm install`, publish: `public`.
+Deploy repo. Build: `npm install`. Publish: `public`.
 
 ## Print CSS
 
-`katina-print.css` hides sharing, tags, YMAL, Disqus, Hypothesis, comments, newsletter; keeps copyright; avoids image page breaks.
+`katina-print.css` — hides sharing, tags, YMAL, Disqus, Hypothesis, comments, newsletter; keeps copyright; images don’t split across pages.

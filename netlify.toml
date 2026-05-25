@@ -10,8 +10,3 @@
 [functions.generate-pdf]
   timeout = 26
   included_files = ["public/katina-print.css"]
-
-[dev]
-  port = 8888
-  publish = "public"
-  functions = "netlify/functions"

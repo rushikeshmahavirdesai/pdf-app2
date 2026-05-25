@@ -1,78 +1,58 @@
 (function () {
-  const ARTICLE_URL_RE =
+  var ARTICLE =
     /^https:\/\/(www\.)?katinamagazine\.org\/content\/article\/.+/i;
 
-  const urlInput = document.getElementById("url");
-  const btnCss = document.getElementById("btn-css");
-  const btnPdf = document.getElementById("btn-pdf");
-  const statusEl = document.getElementById("status");
+  var urlInput = document.getElementById("url");
+  var btnCss = document.getElementById("btn-css");
+  var btnPdf = document.getElementById("btn-pdf");
+  var status = document.getElementById("status");
 
-  btnCss.addEventListener("click", downloadCss);
-  btnPdf.addEventListener("click", downloadPdf);
-
-  function setStatus(msg, isError) {
-    statusEl.textContent = msg;
-    statusEl.classList.toggle("error", !!isError);
-  }
-
-  function getUrl() {
-    return (urlInput.value || "").trim();
-  }
-
-  function validateUrl(url) {
-    if (!url) {
-      setStatus("Paste a Katina article URL first.", true);
-      return false;
-    }
-    if (!ARTICLE_URL_RE.test(url)) {
-      setStatus(
-        "URL must be a Katina article: https://katinamagazine.org/content/article/...",
-        true
-      );
-      return false;
-    }
-    return true;
-  }
-
-  function downloadCss() {
-    const a = document.createElement("a");
+  btnCss.onclick = function () {
+    var a = document.createElement("a");
     a.href = "/katina-print.css";
     a.download = "katina-print.css";
     a.click();
-    setStatus("CSS downloaded.");
-  }
+    setMsg("CSS downloaded.");
+  };
 
-  async function downloadPdf() {
-    const url = getUrl();
-    if (!validateUrl(url)) return;
+  btnPdf.onclick = async function () {
+    var url = urlInput.value.trim();
+    if (!url) return setMsg("Paste a Katina article URL.", true);
+    if (!ARTICLE.test(url))
+      return setMsg("URL must be a Katina article link.", true);
 
     btnPdf.disabled = true;
     btnCss.disabled = true;
-    setStatus("Generating PDF with Playwright… (may take up to a minute)");
+    setMsg("Generating PDF…");
 
     try {
-      const res = await fetch(
-        `/.netlify/functions/generate-pdf?url=${encodeURIComponent(url)}`
+      var res = await fetch(
+        "/.netlify/functions/generate-pdf?url=" + encodeURIComponent(url)
       );
-
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || `PDF failed (HTTP ${res.status})`);
+        var err = await res.json().catch(function () {
+          return {};
+        });
+        throw new Error(err.error || "PDF failed");
       }
-
-      const blob = await res.blob();
-      const slug = url.split("/").filter(Boolean).pop() || "katina-article";
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = slug + ".pdf";
-      a.click();
-      URL.revokeObjectURL(a.href);
-      setStatus("PDF downloaded.");
-    } catch (err) {
-      setStatus(err.message || "PDF generation failed.", true);
+      var blob = await res.blob();
+      var slug = url.split("/").pop() || "article";
+      var link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = slug + ".pdf";
+      link.click();
+      URL.revokeObjectURL(link.href);
+      setMsg("PDF downloaded.");
+    } catch (e) {
+      setMsg(e.message, true);
     } finally {
       btnPdf.disabled = false;
       btnCss.disabled = false;
     }
+  };
+
+  function setMsg(text, isError) {
+    status.textContent = text;
+    status.className = isError ? "error" : "";
   }
 })();
