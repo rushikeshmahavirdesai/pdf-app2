@@ -1,56 +1,63 @@
 /**
- * Katina Magazine — print overrides only (keeps site colors/fonts from Katina CSS)
+ * Katina Magazine — print stylesheet
+ * For browser Print → Save as PDF on katinamagazine.org (install as user stylesheet).
+ * The Playwright app prints the live page directly; this file is for manual use.
  */
 
-/* Hide clutter on screen + print (for PDF render) */
-#katina-print-body .share-tools,
-#katina-print-body .social-share,
-#katina-print-body .tags,
-#katina-print-body .tag-list,
-#katina-print-body .article-tags,
-#katina-print-body .ymal,
-#katina-print-body .you-may-also-like,
-#katina-print-body #disqus_thread,
-#katina-print-body .disqus,
-#katina-print-body #hypothesis-sidebar,
-#katina-print-body [class*="hypothesis"],
-#katina-print-body .comments,
-#katina-print-body .comment-section,
-#katina-print-body .newsletter,
-#katina-print-body [class*="newsletter"],
-#katina-print-body [class*="join-our-community"],
-#katina-print-body [class*="you-may-also-like"],
-#katina-print-body [class*="related-article"],
-#katina-print-body [class*="layout-menu"],
-#katina-print-body #layout-menu,
-#katina-print-body aside,
-#katina-print-body nav,
-#katina-print-body button {
-  display: none !important;
-}
-
 @media print {
-  #katina-print-body {
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
+  nav,
+  aside,
+  .sidebar,
+  .share-tools,
+  .social-share,
+  .tags,
+  .tag-list,
+  .article-tags,
+  .ymal,
+  .you-may-also-like,
+  [class*="you-may-also-like"],
+  [class*="related-article"],
+  #disqus_thread,
+  .disqus,
+  #hypothesis-sidebar,
+  [class*="hypothesis"],
+  iframe[src*="hypothes.is"],
+  .comments,
+  .comment-section,
+  .newsletter,
+  [class*="newsletter"],
+  [class*="join-our-community"],
+  [class*="layout-menu"],
+  #layout-menu,
+  button,
+  [role="navigation"] {
+    display: none !important;
   }
 
-  #katina-print-body img,
-  #katina-print-body figure,
-  #katina-print-body picture {
+  #main-content-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  img,
+  figure,
+  picture {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
     max-width: 100% !important;
   }
 
-  #katina-print-body .copyright,
-  #katina-print-body [class*="copyright"] {
+  .copyright,
+  [class*="copyright"] {
     display: block !important;
-    page-break-inside: avoid;
   }
 
   @page {
-    margin: 1.2cm;
-    size: A4;
+    margin: 1.5cm;
+  }
+
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }

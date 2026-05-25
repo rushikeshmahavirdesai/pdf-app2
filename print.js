@@ -6,6 +6,7 @@ const { chromium } = require("playwright");
 const ARTICLE_URL_RE =
   /^https:\/\/(www\.)?katinamagazine\.org\/content\/article\/.+/i;
 
+/** Remove these nodes from the live page (keeps Katina CSS intact) */
 const REMOVE = [
   "script",
   "noscript",
@@ -15,27 +16,50 @@ const REMOVE = [
   "#hypothesis-sidebar",
   ".share-tools",
   ".social-share",
+  "[class*='share-bar']",
+  "[class*='sharing']",
   ".tags",
   ".tag-list",
   ".article-tags",
+  "[class*='tag-list']",
   ".ymal",
   ".you-may-also-like",
+  "[class*='you-may-also-like']",
+  "[class*='related-article']",
   ".comments",
   ".comment-section",
+  "[class*='comment-section']",
   ".newsletter",
   "[class*='newsletter']",
   "[class*='join-our-community']",
-  "[class*='you-may-also-like']",
-  "[class*='related-article']",
+  "[class*='community-form']",
   "[class*='layout-menu']",
   "#layout-menu",
+  "[class*='advert']",
+  "[class*='advertisement']",
   "button",
 ];
 
-const PRINT_CSS = fs.readFileSync(
-  path.join(__dirname, "katina-print.css"),
-  "utf8"
-);
+const HELPER_CSS = `
+  body { background: #fff !important; }
+  nav, aside, .sidebar, [role="navigation"] { display: none !important; }
+  #main-content-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    float: none !important;
+  }
+  #main-content-container img,
+  #main-content-container figure,
+  #main-content-container picture {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    max-width: 100%;
+  }
+  .copyright, [class*="copyright"] {
+    display: block !important;
+  }
+`;
 
 async function askUrl() {
   const rl = readline.createInterface({
@@ -67,27 +91,13 @@ async function waitForArticle(page) {
   throw new Error("Article did not load (Cloudflare). Try again.");
 }
 
-async function grabArticleBundle(page) {
-  return page.evaluate((removeSels) => {
-    const root =
-      document.querySelector("#main-content-container") ||
-      document.querySelector("main") ||
-      document.querySelector("article");
-    if (!root) return null;
-
-    const copyright = document.querySelector(
-      ".copyright, [class*='copyright']"
-    );
-
-    const styles = [...document.querySelectorAll('link[rel="stylesheet"]')]
-      .map((l) => l.outerHTML)
-      .join("\n");
-
-    const clone = root.cloneNode(true);
-    clone.querySelectorAll("script, noscript, link").forEach((el) => el.remove());
+async function cleanPage(page) {
+  await page.evaluate((removeSels) => {
+    const main = document.querySelector("#main-content-container");
 
     removeSels.forEach((sel) => {
-      clone.querySelectorAll(sel).forEach((el) => {
+      document.querySelectorAll(sel).forEach((el) => {
+        if (main && (el === main || el.contains(main))) return;
         if (
           !el.closest(".copyright") &&
           !el.classList.contains("copyright")
@@ -97,21 +107,51 @@ async function grabArticleBundle(page) {
       });
     });
 
-    let html = clone.innerHTML;
-    const len = clone.innerText.replace(/\s+/g, " ").trim().length;
-    if (len < 400) return null;
+    document.querySelectorAll("nav").forEach((el) => el.remove());
 
-    if (
-      copyright &&
-      copyright.innerText.trim().length > 10 &&
-      !html.toLowerCase().includes("copyright")
-    ) {
-      html +=
-        '<div class="copyright">' + copyright.innerHTML + "</div>";
-    }
+    document.querySelectorAll("aside").forEach((el) => {
+      if (!main || !main.contains(el)) el.remove();
+    });
 
-    return { html, styles, len };
+    document.querySelectorAll("header").forEach((el) => {
+      if (main && !el.contains(main) && !el.closest("#main-content-container")) {
+        el.remove();
+      }
+    });
+
+    document.querySelectorAll("footer").forEach((el) => {
+      const hasCopyright =
+        el.querySelector(".copyright, [class*='copyright']") ||
+        el.classList.contains("copyright") ||
+        (el.className && String(el.className).includes("copyright"));
+      if (!hasCopyright) el.remove();
+    });
   }, REMOVE);
+}
+
+async function getClipRect(page) {
+  return page.evaluate(() => {
+    const main = document.querySelector("#main-content-container");
+    if (!main) return null;
+
+    const rects = [main.getBoundingClientRect()];
+    const copy = document.querySelector(
+      ".copyright, [class*='copyright'], footer [class*='copyright']"
+    );
+    if (copy) rects.push(copy.getBoundingClientRect());
+
+    const top = Math.min(...rects.map((r) => r.top));
+    const left = Math.min(...rects.map((r) => r.left));
+    const right = Math.max(...rects.map((r) => r.right));
+    const bottom = Math.max(...rects.map((r) => r.bottom));
+
+    return {
+      x: left,
+      y: top,
+      width: right - left,
+      height: bottom - top,
+    };
+  });
 }
 
 async function waitForImages(page) {
@@ -141,6 +181,7 @@ async function printArticle(url, outPath) {
       userAgent:
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
       viewport: { width: 1280, height: 900 },
+      deviceScaleFactor: 2,
     });
 
     await context.addInitScript(() => {
@@ -156,45 +197,32 @@ async function printArticle(url, outPath) {
     const title = await waitForArticle(page);
     console.log("Loaded:", title);
 
-    const bundle = await grabArticleBundle(page);
-    if (!bundle) throw new Error("Could not extract article.");
+    console.log("Removing ads, sidebar, comments…");
+    await cleanPage(page);
+    await page.addStyleTag({ content: HELPER_CSS });
+    await waitForImages(page);
+    await page.waitForTimeout(1500);
 
-    console.log("Building PDF with Katina styles + print CSS…");
+    const clip = await getClipRect(page);
+    if (!clip || clip.height < 200) {
+      throw new Error("Could not find article area on page.");
+    }
 
-    const printPage = await context.newPage();
-    const safeUrl = url.replace(/"/g, "&quot;");
-    const doc = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <base href="${safeUrl}">
-  ${bundle.styles}
-  <style>${PRINT_CSS}</style>
-</head>
-<body id="katina-print-body">
-  <div id="main-content-container" class="js-main-content-container">
-    ${bundle.html}
-  </div>
-</body>
-</html>`;
+    console.log("Saving PDF (original Katina design)…");
+    await page.emulateMedia({ media: "screen" });
 
-    await printPage.setContent(doc, {
-      waitUntil: "networkidle",
-      timeout: 120000,
-    });
-    await waitForImages(printPage);
-    await printPage.emulateMedia({ media: "print" });
-
-    await printPage.pdf({
+    await page.pdf({
       path: outPath,
       format: "A4",
       printBackground: true,
-      preferCSSPageSize: true,
-      margin: { top: "12mm", right: "12mm", bottom: "12mm", left: "12mm" },
+      preferCSSPageSize: false,
+      margin: { top: "10mm", right: "10mm", bottom: "10mm", left: "10mm" },
+      clip,
+      scale: 0.95,
     });
 
     const size = fs.statSync(outPath).size;
-    if (size < 50000) throw new Error("PDF looks empty or too small.");
+    if (size < 80000) throw new Error("PDF too small — article may not have rendered.");
     console.log("Saved:", outPath, `(${(size / 1024).toFixed(0)} KB)`);
   } finally {
     await browser.close();
