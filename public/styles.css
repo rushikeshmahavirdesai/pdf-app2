@@ -1,0 +1,107 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  margin: 0;
+  padding: 2rem 1.5rem;
+  background: #f6f6f4;
+  color: #1a1a1a;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 36rem;
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.hint {
+  margin: 0 0 1.25rem;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.35rem;
+}
+
+input[type="url"] {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.95rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+}
+
+input:focus {
+  outline: 2px solid #2d5a3d;
+  outline-offset: 1px;
+  border-color: #2d5a3d;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+button,
+.actions a {
+  font-size: 0.95rem;
+  padding: 0.55rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+#btn-pdf {
+  background: #2d5a3d;
+  color: #fff;
+  border: none;
+  font-weight: 500;
+}
+
+#btn-pdf:hover:not(:disabled) {
+  background: #234a32;
+}
+
+#btn-pdf:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+#btn-css {
+  background: #fff;
+  color: #2d5a3d;
+  border: 1px solid #2d5a3d;
+}
+
+#btn-css:hover {
+  background: #eef4ef;
+}
+
+.status {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  min-height: 1.25em;
+}
+
+.status.error {
+  color: #a33;
+}
+
+.status.ok {
+  color: #2d5a3d;
+}

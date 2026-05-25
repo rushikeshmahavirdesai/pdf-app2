@@ -2,9 +2,11 @@
   "name": "katina-print",
   "version": "1.0.0",
   "private": true,
-  "description": "Playwright CLI to print Katina articles to PDF",
+  "description": "Local Katina article print to PDF (CLI + web)",
   "scripts": {
+    "dev": "node server.js",
     "start": "node print.js",
+    "print": "node print.js",
     "setup": "npx playwright install chromium",
     "examples": "node print-examples.js"
   },
