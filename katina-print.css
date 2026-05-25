@@ -2,6 +2,7 @@
  * Katina Magazine — print / PDF stylesheet
  */
 
+/* --- Hide clutter --- */
 .katina-print-root .share-tools,
 .katina-print-root .social-share,
 .katina-print-root .tags,
@@ -27,85 +28,152 @@
   display: none !important;
 }
 
+/* --- Base layout --- */
 .katina-print-root {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 12pt;
-  line-height: 1.5;
-  color: #000;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 11pt;
+  line-height: 1.55;
+  color: #111;
+  background: #fff;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
 }
 
+.katina-print-root * {
+  box-sizing: border-box;
+}
+
+/* Reset Katina inline / theme overrides */
+.katina-print-root *:not(img):not(svg) {
+  font-family: inherit;
+  color: inherit;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* --- Headings --- */
 .katina-print-root h1,
 .katina-print-root h2,
-.katina-print-root h3 {
-  font-family: "Helvetica Neue", Arial, sans-serif;
+.katina-print-root h3,
+.katina-print-root h4,
+.katina-print-root h5,
+.katina-print-root h6 {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  color: #000;
+  line-height: 1.25;
   page-break-after: avoid;
+  break-after: avoid;
+  margin: 1.25em 0 0.5em;
 }
 
+.katina-print-root h1 {
+  font-size: 22pt;
+  margin-top: 0;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid #ccc;
+}
+
+.katina-print-root h2 { font-size: 16pt; }
+.katina-print-root h3 { font-size: 13pt; }
+.katina-print-root h4 { font-size: 12pt; }
+
+/* --- Body text --- */
+.katina-print-root p {
+  margin: 0 0 0.85em;
+  text-align: left;
+  orphans: 3;
+  widows: 3;
+}
+
+.katina-print-root ul,
+.katina-print-root ol {
+  margin: 0 0 0.85em 1.25em;
+  padding: 0;
+}
+
+.katina-print-root li {
+  margin: 0.25em 0;
+}
+
+.katina-print-root blockquote {
+  margin: 1em 0 1em 1em;
+  padding: 0.5em 0 0.5em 1em;
+  border-left: 3px solid #999;
+  font-style: italic;
+  color: #333;
+}
+
+.katina-print-root a {
+  color: #000;
+  text-decoration: underline;
+}
+
+/* --- Images & figures --- */
 .katina-print-root img,
 .katina-print-root figure,
 .katina-print-root picture {
-  break-inside: avoid;
+  display: block;
+  max-width: 100% !important;
+  height: auto !important;
+  margin: 1em auto;
   page-break-inside: avoid;
-  max-width: 100%;
+  break-inside: avoid;
 }
 
+.katina-print-root figcaption,
+.katina-print-root .caption,
+.katina-print-root [class*="caption"] {
+  font-size: 9.5pt;
+  font-style: italic;
+  color: #444;
+  text-align: center;
+  margin: 0.35em 0 1em;
+  page-break-inside: avoid;
+}
+
+/* --- Byline / meta --- */
+.katina-print-root [class*="author"],
+.katina-print-root [class*="byline"],
+.katina-print-root [class*="date"],
+.katina-print-root time {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10pt;
+  color: #444;
+}
+
+/* --- Copyright (keep visible) --- */
 .katina-print-root .copyright,
 .katina-print-root [class*="copyright"] {
   display: block !important;
-  margin-top: 1.5rem;
-  font-size: 0.85rem;
+  margin-top: 2em;
+  padding-top: 1em;
+  border-top: 1px solid #ccc;
+  font-size: 9pt;
+  color: #333;
+  page-break-inside: avoid;
+}
+
+/* --- Tables --- */
+.katina-print-root table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+  font-size: 10pt;
+}
+
+.katina-print-root th,
+.katina-print-root td {
+  border: 1px solid #ccc;
+  padding: 0.4em 0.6em;
+  text-align: left;
 }
 
 @media print {
-  .share-tools,
-  .social-share,
-  .tags,
-  .tag-list,
-  .article-tags,
-  .ymal,
-  .you-may-also-like,
-  aside,
-  .sidebar,
-  [class*="you-may-also-like"],
-  [class*="related-article"],
-  #disqus_thread,
-  .disqus,
-  #hypothesis-sidebar,
-  [class*="hypothesis"],
-  iframe[src*="hypothes.is"],
-  .comments,
-  .comment-section,
-  .newsletter,
-  [class*="newsletter"],
-  [class*="join-our-community"],
-  body > nav,
-  body > header,
-  [class*="layout-menu"],
-  #layout-menu,
-  iframe,
-  button,
-  [role="navigation"] {
-    display: none !important;
-  }
-
-  @page { margin: 2cm; }
-
-  body {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 12pt;
-    line-height: 1.5;
-    color: #000;
-  }
-
-  img, figure, picture {
-    break-inside: avoid;
-    page-break-inside: avoid;
-    max-width: 100%;
-  }
-
-  .copyright,
-  [class*="copyright"] {
-    display: block !important;
-    margin-top: 1.5rem;
+  @page {
+    margin: 2cm;
+    size: A4;
   }
 }

@@ -34,7 +34,7 @@ const REMOVE = [
   "button",
 ];
 
-const PDF_CSS = fs.readFileSync(
+const PRINT_CSS = fs.readFileSync(
   path.join(__dirname, "katina-print.css"),
   "utf8"
 );
@@ -69,7 +69,7 @@ async function waitForArticle(page) {
   throw new Error("Article did not load (Cloudflare). Try again.");
 }
 
-async function extractHtml(page) {
+async function extractArticle(page) {
   return page.evaluate((removeSels) => {
     const root =
       document.querySelector("#main-content-container") ||
@@ -77,7 +77,15 @@ async function extractHtml(page) {
       document.querySelector("article");
     if (!root) return null;
 
+    const copyright =
+      document.querySelector(".copyright, [class*='copyright']") ||
+      document.querySelector("footer [class*='copyright']");
+
     const clone = root.cloneNode(true);
+
+    clone.querySelectorAll("[style]").forEach((el) => el.removeAttribute("style"));
+    clone.querySelectorAll("link, script, noscript").forEach((el) => el.remove());
+
     removeSels.forEach((sel) => {
       clone.querySelectorAll(sel).forEach((el) => {
         if (
@@ -89,10 +97,36 @@ async function extractHtml(page) {
       });
     });
 
+    let html = clone.innerHTML;
     const len = clone.innerText.replace(/\s+/g, " ").trim().length;
     if (len < 400) return null;
-    return clone.innerHTML;
+
+    if (
+      copyright &&
+      !html.includes("copyright") &&
+      copyright.innerText.trim().length > 10
+    ) {
+      html += '<div class="copyright">' + copyright.innerHTML + "</div>";
+    }
+
+    return html;
   }, REMOVE);
+}
+
+async function waitForImages(page) {
+  await page.evaluate(async () => {
+    const imgs = [...document.querySelectorAll("img")];
+    await Promise.all(
+      imgs.map((img) => {
+        if (img.complete) return;
+        return new Promise((r) => {
+          img.onload = r;
+          img.onerror = r;
+          setTimeout(r, 8000);
+        });
+      })
+    );
+  });
 }
 
 async function printArticle(url, outPath) {
@@ -105,7 +139,7 @@ async function printArticle(url, outPath) {
     const context = await browser.newContext({
       userAgent:
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-      viewport: { width: 1280, height: 900 },
+      viewport: { width: 900, height: 1200 },
     });
 
     await context.addInitScript(() => {
@@ -121,20 +155,34 @@ async function printArticle(url, outPath) {
     const title = await waitForArticle(page);
     console.log("Loaded:", title);
 
-    const html = await extractHtml(page);
+    const html = await extractArticle(page);
     if (!html) throw new Error("Could not extract article.");
 
     const printPage = await context.newPage();
-    const doc = `<!DOCTYPE html><html><head><meta charset="utf-8"><base href="${url}"><style>${PDF_CSS}</style></head><body class="katina-print-root">${html}</body></html>`;
+    const safeUrl = url.replace(/"/g, "&quot;");
+    const doc = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <base href="${safeUrl}">
+  <style>${PRINT_CSS}</style>
+</head>
+<body class="katina-print-root">${html}</body>
+</html>`;
 
-    await printPage.setContent(doc, { waitUntil: "load", timeout: 60000 });
-    await printPage.waitForTimeout(2000);
+    await printPage.setContent(doc, {
+      waitUntil: "networkidle",
+      timeout: 90000,
+    });
+    await waitForImages(printPage);
+    await printPage.emulateMedia({ media: "print" });
 
     await printPage.pdf({
       path: outPath,
       format: "A4",
       printBackground: true,
-      margin: { top: "2cm", right: "2cm", bottom: "2cm", left: "2cm" },
+      preferCSSPageSize: true,
+      margin: { top: "20mm", right: "18mm", bottom: "20mm", left: "18mm" },
     });
 
     const size = fs.statSync(outPath).size;
