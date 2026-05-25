@@ -5,7 +5,8 @@
   "description": "Playwright CLI to print Katina articles to PDF",
   "scripts": {
     "start": "node print.js",
-    "setup": "npx playwright install chromium"
+    "setup": "npx playwright install chromium",
+    "examples": "node print-examples.js"
   },
   "dependencies": {
     "playwright": "^1.49.1"

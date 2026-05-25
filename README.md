@@ -1,6 +1,6 @@
 # Katina Print (Playwright)
 
-Local app — paste a Katina article URL, get a PDF. No web server.
+Local app — give a Katina article URL, get a styled PDF.
 
 ## Setup (once)
 
@@ -9,21 +9,39 @@ npm install
 npm run setup
 ```
 
-## Run
+## Run (change the URL)
+
+```bash
+node print.js "PASTE-ARTICLE-URL-HERE"
+```
+
+PDF saves here as `article-slug.pdf`.
+
+Interactive (paste when asked):
 
 ```bash
 npm start
 ```
 
-Paste the article URL when asked.
-
-Or pass the URL directly:
+## Example articles
 
 ```bash
+node print.js "https://katinamagazine.org/content/article/future-of-work/2026/university-of-arkansas-twenty-first-century-library"
+
+node print.js "https://katinamagazine.org/content/article/open-knowledge/2026/what-are-open-infrastructure-evaluation-frameworks-for"
+
+node print.js "https://katinamagazine.org/content/article/future-of-work/2026/building-a-shared-cultural-behaviors-program"
+
+node print.js "https://katinamagazine.org/content/article/resource-reviews/2026/consortial-coordination-for-advancing-accessibility"
+
 node print.js "https://katinamagazine.org/content/article/open-knowledge/2026/the-commodification-of-sensitive-open-data"
 ```
 
-PDF saves in this folder as `article-name.pdf`.
+## Print all examples
+
+```bash
+npm run examples
+```
 
 ## Print CSS
 
