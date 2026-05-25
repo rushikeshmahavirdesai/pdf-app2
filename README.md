@@ -37,4 +37,4 @@ Do **not** use Live Server or another static-only server on 8888 — `/.netlify/
 - **Download CSS** — saves `katina-print.css` for use on Katina pages or in the app.
 - **Download PDF** — fetches the article, strips sharing, tags, comments, Disqus, Hypothesis, YMAL, and newsletter blocks; keeps the copyright paragraph; downloads a PDF.
 
-If PDF fetch fails (Cloudflare), use **Download CSS** on the live article and print from the browser.
+Katina blocks server fetches (HTTP 403). **Download PDF** opens the article in your browser, copies a short script to the clipboard, then you paste it in the address bar on that tab (Ctrl+L → Ctrl+V → Enter) to generate the PDF. **Download CSS** still works anytime.

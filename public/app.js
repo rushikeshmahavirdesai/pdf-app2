@@ -51,6 +51,10 @@
     "[role='navigation']",
   ].join(",");
 
+  const ORIGIN = window.location.origin;
+  const CSS_URL = ORIGIN + "/katina-print.css";
+  const HELPER_URL = ORIGIN + "/pdf-helper.js";
+
   const urlInput = document.getElementById("url");
   const btnCss = document.getElementById("btn-css");
   const btnPdf = document.getElementById("btn-pdf");
@@ -91,6 +95,26 @@
     setStatus("CSS downloaded.");
   }
 
+  function buildBookmarklet() {
+    const code = [
+      "window.__KATINA_PRINT_CSS__=" + JSON.stringify(CSS_URL) + ";",
+      "var s=document.createElement('script');",
+      "s.src=" + JSON.stringify(HELPER_URL) + ";",
+      "document.head.appendChild(s);",
+    ].join("");
+    return "javascript:" + encodeURI(code);
+  }
+
+  async function copyBookmarklet() {
+    const href = buildBookmarklet();
+    try {
+      await navigator.clipboard.writeText(href);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   async function downloadPdf() {
     const url = getUrl();
     if (!validateUrl(url)) return;
@@ -100,48 +124,81 @@
     setStatus("Preparing PDF…");
 
     try {
-      const res = await fetch(
-        `/.netlify/functions/fetch-article?url=${encodeURIComponent(url)}`
-      );
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        throw new Error(data.error || "Failed to fetch article.");
+      const html = await tryFetchArticle(url);
+      if (html) {
+        await generatePdfFromHtml(html, url);
+        setStatus("PDF downloaded.");
+        return;
       }
-
-      const container = buildPrintContainer(data.html, url);
-      document.body.appendChild(container);
-
-      await waitForImages(container);
-
-      const slug = url.split("/").filter(Boolean).pop() || "katina-article";
-      const filename = `${slug}.pdf`;
-
-      await html2pdf()
-        .set({
-          margin: [15, 15, 15, 15],
-          filename,
-          image: { type: "jpeg", quality: 0.92 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            width: 800,
-          },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["avoid-all", "css", "legacy"] },
-        })
-        .from(container)
-        .save();
-
-      document.body.removeChild(container);
-      setStatus("PDF downloaded.");
-    } catch (err) {
-      setStatus(err.message || "PDF generation failed.", true);
-    } finally {
-      btnPdf.disabled = false;
-      btnCss.disabled = false;
+    } catch (_) {
+      /* server blocked — use browser flow */
     }
+
+    const copied = await copyBookmarklet();
+    window.open(url, "_blank", "noopener");
+
+    if (copied) {
+      setStatus(
+        "Article opened. On that tab: click the address bar (Ctrl+L), paste (Ctrl+V), press Enter. PDF will download."
+      );
+    } else {
+      setStatus(
+        "Article opened. Drag the “PDF bookmark” link below to your bookmarks, then click it on the article tab.",
+        true
+      );
+      showBookmarkletLink();
+    }
+
+    btnPdf.disabled = false;
+    btnCss.disabled = false;
+  }
+
+  async function tryFetchArticle(url) {
+    const res = await fetch(
+      `/.netlify/functions/fetch-article?url=${encodeURIComponent(url)}`
+    );
+    const data = await res.json();
+    if (!res.ok || data.error || !data.html) return null;
+    return data.html;
+  }
+
+  function showBookmarkletLink() {
+    let link = document.getElementById("bookmarklet-link");
+    if (!link) {
+      link = document.createElement("a");
+      link.id = "bookmarklet-link";
+      link.textContent = "PDF bookmark (drag to bookmarks bar)";
+      link.href = buildBookmarklet();
+      link.style.display = "block";
+      link.style.marginTop = "0.75rem";
+      statusEl.after(link);
+    }
+  }
+
+  async function generatePdfFromHtml(html, url) {
+    const container = buildPrintContainer(html, url);
+    document.body.appendChild(container);
+    await waitForImages(container);
+
+    const slug = url.split("/").filter(Boolean).pop() || "katina-article";
+    await html2pdf()
+      .set({
+        margin: [15, 15, 15, 15],
+        filename: slug + ".pdf",
+        image: { type: "jpeg", quality: 0.92 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          width: 800,
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+        pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+      })
+      .from(container)
+      .save();
+
+    document.body.removeChild(container);
   }
 
   function buildPrintContainer(html, baseUrl) {
@@ -171,7 +228,7 @@
 
     const styleLink = document.createElement("link");
     styleLink.rel = "stylesheet";
-    styleLink.href = new URL("/katina-print.css", window.location.origin).href;
+    styleLink.href = CSS_URL;
     container.appendChild(styleLink);
 
     const inner = document.createElement("div");

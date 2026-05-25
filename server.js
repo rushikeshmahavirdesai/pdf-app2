@@ -18,6 +18,7 @@ const MIME = {
   ".js": "application/javascript; charset=utf-8",
   ".json": "application/json",
   ".ico": "image/x-icon",
+  ".map": "application/json",
 };
 
 const server = http.createServer(async (req, res) => {
