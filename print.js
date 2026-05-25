@@ -29,8 +29,6 @@ const REMOVE = [
   "[class*='related-article']",
   "[class*='layout-menu']",
   "#layout-menu",
-  "nav",
-  "aside",
   "button",
 ];
 
@@ -69,7 +67,7 @@ async function waitForArticle(page) {
   throw new Error("Article did not load (Cloudflare). Try again.");
 }
 
-async function extractArticle(page) {
+async function grabArticleBundle(page) {
   return page.evaluate((removeSels) => {
     const root =
       document.querySelector("#main-content-container") ||
@@ -77,14 +75,16 @@ async function extractArticle(page) {
       document.querySelector("article");
     if (!root) return null;
 
-    const copyright =
-      document.querySelector(".copyright, [class*='copyright']") ||
-      document.querySelector("footer [class*='copyright']");
+    const copyright = document.querySelector(
+      ".copyright, [class*='copyright']"
+    );
+
+    const styles = [...document.querySelectorAll('link[rel="stylesheet"]')]
+      .map((l) => l.outerHTML)
+      .join("\n");
 
     const clone = root.cloneNode(true);
-
-    clone.querySelectorAll("[style]").forEach((el) => el.removeAttribute("style"));
-    clone.querySelectorAll("link, script, noscript").forEach((el) => el.remove());
+    clone.querySelectorAll("script, noscript, link").forEach((el) => el.remove());
 
     removeSels.forEach((sel) => {
       clone.querySelectorAll(sel).forEach((el) => {
@@ -103,13 +103,14 @@ async function extractArticle(page) {
 
     if (
       copyright &&
-      !html.includes("copyright") &&
-      copyright.innerText.trim().length > 10
+      copyright.innerText.trim().length > 10 &&
+      !html.toLowerCase().includes("copyright")
     ) {
-      html += '<div class="copyright">' + copyright.innerHTML + "</div>";
+      html +=
+        '<div class="copyright">' + copyright.innerHTML + "</div>";
     }
 
-    return html;
+    return { html, styles, len };
   }, REMOVE);
 }
 
@@ -139,7 +140,7 @@ async function printArticle(url, outPath) {
     const context = await browser.newContext({
       userAgent:
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-      viewport: { width: 900, height: 1200 },
+      viewport: { width: 1280, height: 900 },
     });
 
     await context.addInitScript(() => {
@@ -150,13 +151,15 @@ async function printArticle(url, outPath) {
 
     const page = await context.newPage();
     console.log("Opening article…");
-    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 120000 });
+    await page.goto(url, { waitUntil: "networkidle", timeout: 120000 });
 
     const title = await waitForArticle(page);
     console.log("Loaded:", title);
 
-    const html = await extractArticle(page);
-    if (!html) throw new Error("Could not extract article.");
+    const bundle = await grabArticleBundle(page);
+    if (!bundle) throw new Error("Could not extract article.");
+
+    console.log("Building PDF with Katina styles + print CSS…");
 
     const printPage = await context.newPage();
     const safeUrl = url.replace(/"/g, "&quot;");
@@ -165,14 +168,19 @@ async function printArticle(url, outPath) {
 <head>
   <meta charset="utf-8">
   <base href="${safeUrl}">
+  ${bundle.styles}
   <style>${PRINT_CSS}</style>
 </head>
-<body class="katina-print-root">${html}</body>
+<body id="katina-print-body">
+  <div id="main-content-container" class="js-main-content-container">
+    ${bundle.html}
+  </div>
+</body>
 </html>`;
 
     await printPage.setContent(doc, {
       waitUntil: "networkidle",
-      timeout: 90000,
+      timeout: 120000,
     });
     await waitForImages(printPage);
     await printPage.emulateMedia({ media: "print" });
@@ -182,11 +190,11 @@ async function printArticle(url, outPath) {
       format: "A4",
       printBackground: true,
       preferCSSPageSize: true,
-      margin: { top: "20mm", right: "18mm", bottom: "20mm", left: "18mm" },
+      margin: { top: "12mm", right: "12mm", bottom: "12mm", left: "12mm" },
     });
 
     const size = fs.statSync(outPath).size;
-    if (size < 10000) throw new Error("PDF looks empty.");
+    if (size < 50000) throw new Error("PDF looks empty or too small.");
     console.log("Saved:", outPath, `(${(size / 1024).toFixed(0)} KB)`);
   } finally {
     await browser.close();
