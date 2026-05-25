@@ -1,4 +1,4 @@
 node_modules/
 .netlify/
-test-out.pdf
+*.pdf
 .DS_Store

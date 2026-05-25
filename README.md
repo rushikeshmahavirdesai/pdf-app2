@@ -1,31 +1,30 @@
-# Katina Print
+# Katina Print (Playwright)
 
-Simple **client-side** app (static files only). Deploy to Netlify — no build, no server functions.
+Local app — paste a Katina article URL, get a PDF. No web server.
 
-## Files
-
-- `public/index.html` — URL input + Download CSS + Download PDF
-- `public/katina-print.css` — print stylesheet for Katina articles
-- `public/app.js` — fetches article, builds PDF in the browser
-
-## Local
-
-Open `public/index.html` in a browser, or:
+## Setup (once)
 
 ```bash
-npx serve public
+npm install
+npm run setup
 ```
 
-## Netlify
+## Run
 
-Publish directory: `public`
+```bash
+npm start
+```
+
+Paste the article URL when asked.
+
+Or pass the URL directly:
+
+```bash
+node print.js "https://katinamagazine.org/content/article/open-knowledge/2026/the-commodification-of-sensitive-open-data"
+```
+
+PDF saves in this folder as `article-name.pdf`.
 
 ## Print CSS
 
-Hides: sharing, tags, you-may-also-like, Disqus, Hypothesis, comments, newsletter.  
-Keeps: article body and copyright.  
-Images do not split across pages.
-
-## PDF note
-
-PDF is generated in your browser. If fetch is blocked, the article opens in a new tab — use **Ctrl+P** → Save as PDF (with Download CSS installed as a user stylesheet).
+`katina-print.css` hides sharing, tags, YMAL, Disqus, Hypothesis, comments, newsletter. Keeps copyright. Images don’t split across pages.

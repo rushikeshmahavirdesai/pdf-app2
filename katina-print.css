@@ -1,7 +1,5 @@
 /**
- * Katina Magazine — print stylesheet
- * Browser: use with Print → Save as PDF (@media print rules).
- * Katina Print app: .katina-print-root rules apply to PDF preview.
+ * Katina Magazine — print / PDF stylesheet
  */
 
 .katina-print-root .share-tools,
@@ -40,6 +38,7 @@
 .katina-print-root h2,
 .katina-print-root h3 {
   font-family: "Helvetica Neue", Arial, sans-serif;
+  page-break-after: avoid;
 }
 
 .katina-print-root img,
@@ -50,62 +49,35 @@
   max-width: 100%;
 }
 
+.katina-print-root .copyright,
+.katina-print-root [class*="copyright"] {
+  display: block !important;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+}
+
 @media print {
-  /* Sharing */
   .share-tools,
   .social-share,
-  [class*="share-bar"],
-  [class*="sharing"] {
-    display: none !important;
-  }
-
-  /* Tags */
   .tags,
   .tag-list,
   .article-tags,
-  [class*="tag-list"] {
-    display: none !important;
-  }
-
-  /* You may also like */
   .ymal,
   .you-may-also-like,
   aside,
   .sidebar,
   [class*="you-may-also-like"],
-  [class*="related-article"] {
-    display: none !important;
-  }
-
-  /* Disqus */
+  [class*="related-article"],
   #disqus_thread,
   .disqus,
-  [id*="disqus"] {
-    display: none !important;
-  }
-
-  /* Hypothesis */
   #hypothesis-sidebar,
   [class*="hypothesis"],
-  iframe[src*="hypothes.is"] {
-    display: none !important;
-  }
-
-  /* Comments */
+  iframe[src*="hypothes.is"],
   .comments,
   .comment-section,
-  [class*="comment-section"] {
-    display: none !important;
-  }
-
-  /* Join our community / newsletter */
   .newsletter,
   [class*="newsletter"],
-  [class*="join-our-community"] {
-    display: none !important;
-  }
-
-  /* Site chrome (keep article + copyright footer) */
+  [class*="join-our-community"],
   body > nav,
   body > header,
   [class*="layout-menu"],
@@ -116,51 +88,24 @@
     display: none !important;
   }
 
-  @page {
-    margin: 2cm;
-  }
+  @page { margin: 2cm; }
 
   body {
     font-family: Georgia, "Times New Roman", serif;
     font-size: 12pt;
     line-height: 1.5;
     color: #000;
-    background: #fff;
   }
 
-  h1, h2, h3, h4 {
-    font-family: "Helvetica Neue", Arial, sans-serif;
-    page-break-after: avoid;
-  }
-
-  h1 { font-size: 1.75rem; margin: 0 0 0.75rem; }
-  h2 { font-size: 1.35rem; margin: 1.25rem 0 0.5rem; }
-  h3 { font-size: 1.15rem; margin: 1rem 0 0.4rem; }
-
-  p {
-    margin: 0 0 0.75rem;
-    orphans: 3;
-    widows: 3;
-  }
-
-  a {
-    color: #000;
-    text-decoration: underline;
-  }
-
-  img,
-  figure,
-  picture {
+  img, figure, picture {
     break-inside: avoid;
     page-break-inside: avoid;
     max-width: 100%;
-    height: auto;
   }
 
   .copyright,
   [class*="copyright"] {
     display: block !important;
     margin-top: 1.5rem;
-    font-size: 0.85rem;
   }
 }
