@@ -1,0 +1,162 @@
+/**
+ * Katina Magazine — print / PDF stylesheet
+ * Use on katinamagazine.org article pages or via the Katina Print app.
+ */
+
+/* --- Hide clutter --- */
+.share,
+.share-tools,
+.social-share,
+[class*="share"],
+[class*="sharing"],
+.tags,
+.tag-list,
+.article-tags,
+[class*="tag-list"],
+[class*="article-tag"],
+.ymal,
+[class*="ymal"],
+.you-may-also-like,
+[class*="you-may"],
+[class*="related-article"],
+#disqus_thread,
+.disqus,
+[id*="disqus"],
+[class*="disqus"],
+#hypothesis-sidebar,
+.hypothesis,
+[class*="hypothesis"],
+iframe[src*="hypothes.is"],
+iframe[src*="disqus"],
+.comments,
+.comment-section,
+[class*="comment"],
+.newsletter,
+[class*="newsletter"],
+[class*="community-form"],
+[class*="join-our-community"],
+nav,
+header.site-header,
+footer.site-footer,
+[class*="advert"],
+[class*="advertisement"],
+[class*="layout-menu"],
+#layout-menu,
+.sidebar,
+aside,
+.promo,
+[class*="promo"],
+.cookie,
+[class*="cookie"],
+button,
+[role="navigation"] {
+  display: none !important;
+}
+
+/* --- Base typography --- */
+html {
+  font-size: 12pt;
+}
+
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.5;
+  color: #000;
+  background: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+article,
+.main-content,
+[class*="article-body"],
+[class*="article-content"],
+.content {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+}
+
+h1, h2, h3, h4 {
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.25;
+  page-break-after: avoid;
+}
+
+h1 {
+  font-size: 1.75rem;
+  margin: 0 0 0.75rem;
+}
+
+h2 {
+  font-size: 1.35rem;
+  margin: 1.25rem 0 0.5rem;
+}
+
+h3 {
+  font-size: 1.15rem;
+  margin: 1rem 0 0.4rem;
+}
+
+p {
+  margin: 0 0 0.75rem;
+  orphans: 3;
+  widows: 3;
+}
+
+a {
+  color: #000;
+  text-decoration: underline;
+}
+
+/* --- Images: avoid page breaks across pages --- */
+img,
+figure,
+.figure,
+picture,
+[class*="figure"],
+[class*="image"] {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  max-width: 100%;
+  height: auto;
+}
+
+figcaption {
+  font-size: 0.9rem;
+  font-style: italic;
+  margin-top: 0.25rem;
+}
+
+/* --- Keep copyright visible (do not hide) --- */
+.copyright,
+[class*="copyright"],
+footer .copyright,
+p:last-of-type.copyright {
+  display: block !important;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+  color: #333;
+}
+
+@media print {
+  @page {
+    margin: 2cm;
+  }
+
+  body {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    font-weight: normal;
+  }
+
+  a[href^="#"]::after,
+  a[href^="/"]::after {
+    content: "";
+  }
+}
